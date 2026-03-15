@@ -12,6 +12,8 @@
 <meta name="apple-mobile-web-app-title" content="PriorAI"/>
 <link rel="apple-touch-icon" href="icons/icon-192.png"/>
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
+<!-- Netlify Identity SDK -->
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -1002,9 +1004,216 @@ select option { background:var(--black4); }
   font-size:10px; font-weight:700;
   color:var(--gold2);
 }
+
+/* ── Auth screen ── */
+#authScreen {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: var(--black);
+  overflow-y: auto;
+  align-items: center;
+  justify-content: center;
+}
+#authScreen.show { display: flex; }
+
+.auth-wrap {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 2.5rem 1.75rem 3rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: center;
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2.5rem;
+}
+
+.auth-logo-mark {
+  width: 44px; height: 44px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.4);
+  flex-shrink: 0;
+}
+
+.auth-logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 900;
+  background: linear-gradient(135deg, var(--gold), var(--gold3));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.auth-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.75rem; font-weight: 900;
+  letter-spacing: -0.03em; line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.auth-sub {
+  font-size: 14px; color: var(--text2);
+  line-height: 1.65; margin-bottom: 2rem;
+}
+
+.auth-tabs {
+  display: flex;
+  background: var(--black3);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.auth-tab {
+  flex: 1; padding: 8px;
+  text-align: center;
+  font-size: 13px; font-weight: 600;
+  color: var(--text3);
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none; background: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-tab.active {
+  background: var(--black5);
+  color: var(--text);
+}
+
+.auth-field { margin-bottom: 12px; }
+
+.auth-field label {
+  display: block;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--text3); margin-bottom: 5px;
+}
+
+.auth-submit {
+  width: 100%; padding: 14px;
+  font-size: 15px; font-weight: 700;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--black);
+  border: none; cursor: pointer;
+  transition: all 0.15s;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+  margin-top: 4px;
+  font-family: 'Inter', sans-serif;
+}
+.auth-submit:hover { box-shadow: 0 6px 28px rgba(201,168,76,0.5); transform: translateY(-1px); }
+.auth-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.auth-error {
+  background: var(--red-bg);
+  border: 1px solid rgba(224,92,92,0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px; color: var(--red);
+  margin-bottom: 12px;
+  display: none;
+}
+
+.auth-error.show { display: block; }
+
+.auth-divider {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; color: var(--text3);
+  margin: 1rem 0;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px;
+  background: rgba(255,255,255,0.06);
+}
+
+.auth-perks {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-top: 1.5rem;
+}
+
+.auth-perk {
+  background: var(--black3);
+  border: 1px solid var(--gold-border);
+  border-radius: 10px; padding: 0.75rem;
+}
+.auth-perk-icon { font-size: 1.1rem; margin-bottom: 4px; }
+.auth-perk-title { font-size: 11px; font-weight: 600; color: var(--text); }
+.auth-perk-desc { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
 </style>
 </head>
 <body>
+
+
+<!-- ── Auth Screen ── -->
+<div id="authScreen" class="show">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <div class="auth-logo-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0900" stroke-width="2.5" stroke-linecap="round"><path d="M12 2l3 7h7l-5.5 4 2 7L12 16l-6.5 4 2-7L2 9h7z"/></svg>
+      </div>
+      <div class="auth-logo-text">PriorAI</div>
+    </div>
+
+    <div class="auth-title" id="authTitle">Create your account</div>
+    <div class="auth-sub" id="authSub">Sign up for free and start your 7-day Pro trial. No credit card required.</div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabSignup" onclick="switchAuth('signup')">Sign up</button>
+      <button class="auth-tab" id="tabLogin" onclick="switchAuth('login')">Log in</button>
+    </div>
+
+    <div id="authError" class="auth-error"></div>
+
+    <div id="signupForm">
+      <div class="auth-field">
+        <label>Full name</label>
+        <input type="text" id="authName" placeholder="Your name" autocomplete="name"/>
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="authEmailS" placeholder="you@email.com" autocomplete="email"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="authPassS" placeholder="Min. 8 characters" autocomplete="new-password"/>
+      </div>
+      <button class="auth-submit" id="signupBtn" onclick="doSignup()">Create Account &amp; Start Free Trial</button>
+    </div>
+
+    <div id="loginForm" style="display:none">
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="authEmailL" placeholder="you@email.com" autocomplete="email"/>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="authPassL" placeholder="Your password" autocomplete="current-password"/>
+      </div>
+      <button class="auth-submit" id="loginBtn" onclick="doLogin()">Log In</button>
+    </div>
+
+    <div class="auth-perks" id="authPerks">
+      <div class="auth-perk"><div class="auth-perk-icon">⚡</div><div class="auth-perk-title">AI Prioritization</div><div class="auth-perk-desc">Free for 7 days</div></div>
+      <div class="auth-perk"><div class="auth-perk-icon">📴</div><div class="auth-perk-title">Works offline</div><div class="auth-perk-desc">Tasks on your device</div></div>
+      <div class="auth-perk"><div class="auth-perk-icon">🔒</div><div class="auth-perk-title">Private</div><div class="auth-perk-desc">Your data stays yours</div></div>
+      <div class="auth-perk"><div class="auth-perk-icon">✦</div><div class="auth-perk-title">No card needed</div><div class="auth-perk-desc">Trial is fully free</div></div>
+    </div>
+
+  </div>
+</div>
 
 <!-- ── Onboarding ── -->
 <div id="onboarding">
@@ -1303,6 +1512,14 @@ select option { background:var(--black4); }
         <div class="settings-row">
           <div><div class="settings-row-lbl">View onboarding</div><div class="settings-row-desc">Revisit the intro guide</div></div>
           <button class="btn btn-ghost btn-sm" onclick="showOB()">View</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-sec-title">Account</div>
+        <div class="settings-row">
+          <div><div class="settings-row-lbl" id="settingsUserEmail">Account</div><div class="settings-row-desc">Signed in</div></div>
+          <button class="btn btn-ghost btn-sm" onclick="doLogout()">Log out</button>
         </div>
       </div>
 
@@ -1740,6 +1957,148 @@ function closeOB(){
   localStorage.setItem('pa_ob','1');
 }
 
+
+// ── Netlify Identity / Auth ──────────────────────────────────────────────────
+
+let currentUser = null;
+
+function switchAuth(mode) {
+  const isSignup = mode === 'signup';
+  $('tabSignup').classList.toggle('active', isSignup);
+  $('tabLogin').classList.toggle('active', !isSignup);
+  $('signupForm').style.display = isSignup ? '' : 'none';
+  $('loginForm').style.display = isSignup ? 'none' : '';
+  $('authTitle').textContent = isSignup ? 'Create your account' : 'Welcome back';
+  $('authSub').textContent = isSignup
+    ? 'Sign up free and start your 7-day Pro trial. No credit card required.'
+    : 'Log in to continue with PriorAI.';
+  $('authPerks').style.display = isSignup ? '' : 'none';
+  hideAuthError();
+}
+
+function showAuthError(msg) {
+  const el = $('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function hideAuthError() {
+  $('authError').classList.remove('show');
+}
+
+function setAuthLoading(btn, loading) {
+  btn.disabled = loading;
+  if (loading) {
+    btn._orig = btn.textContent;
+    btn.innerHTML = '<span class="spin" style="border-top-color:#0a0900"></span> Please wait...';
+  } else {
+    btn.textContent = btn._orig || btn.textContent;
+  }
+}
+
+async function doSignup() {
+  hideAuthError();
+  const name  = $('authName').value.trim();
+  const email = $('authEmailS').value.trim();
+  const pass  = $('authPassS').value;
+
+  if (!name)  { showAuthError('Please enter your name'); return; }
+  if (!email) { showAuthError('Please enter your email'); return; }
+  if (pass.length < 8) { showAuthError('Password must be at least 8 characters'); return; }
+
+  const btn = $('signupBtn');
+  setAuthLoading(btn, true);
+
+  try {
+    const user = await netlifyIdentity.signup(email, pass, { full_name: name });
+    // Auto-login after signup
+    await netlifyIdentity.login(email, pass);
+    onAuthSuccess(netlifyIdentity.currentUser());
+  } catch(e) {
+    const msg = e.message || '';
+    if (msg.includes('already registered')) showAuthError('That email is already registered. Try logging in.');
+    else if (msg.includes('invalid')) showAuthError('Please enter a valid email address.');
+    else showAuthError('Sign up failed — please try again.');
+    setAuthLoading(btn, false);
+  }
+}
+
+async function doLogin() {
+  hideAuthError();
+  const email = $('authEmailL').value.trim();
+  const pass  = $('authPassL').value;
+
+  if (!email) { showAuthError('Please enter your email'); return; }
+  if (!pass)  { showAuthError('Please enter your password'); return; }
+
+  const btn = $('loginBtn');
+  setAuthLoading(btn, true);
+
+  try {
+    await netlifyIdentity.login(email, pass);
+    onAuthSuccess(netlifyIdentity.currentUser());
+  } catch(e) {
+    showAuthError('Incorrect email or password. Please try again.');
+    setAuthLoading(btn, false);
+  }
+}
+
+function onAuthSuccess(user) {
+  if (!user) return;
+  currentUser = user;
+
+  // Update settings email display
+  const emailEl = $('settingsUserEmail');
+  if (emailEl) emailEl.textContent = user.email || 'Account';
+
+  // Hide auth screen
+  $('authScreen').classList.remove('show');
+  document.body.style.overflow = '';
+
+  // Start trial automatically on first signup
+  const trialKey = 'pa_trial_started_' + user.id;
+  if (!localStorage.getItem(trialKey) && pro.status === 'free') {
+    pro.status = 'trial';
+    pro.trialStart = Date.now();
+    pro.uid = user.id;
+    savePro();
+    localStorage.setItem(trialKey, '1');
+    toast('Welcome! Your 7-day free trial has started ✦');
+  }
+
+  updateProUI();
+
+  // Show onboarding on first ever visit
+  if (!localStorage.getItem('pa_ob')) showOB();
+}
+
+function doLogout() {
+  netlifyIdentity.logout();
+  currentUser = null;
+  $('authScreen').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  toast('Logged out');
+}
+
+// Init Netlify Identity
+netlifyIdentity.on('init', user => {
+  if (user) {
+    onAuthSuccess(user);
+  } else {
+    // No session — show auth screen
+    $('authScreen').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+});
+
+netlifyIdentity.on('login', user => onAuthSuccess(user));
+netlifyIdentity.on('logout', () => {
+  $('authScreen').classList.add('show');
+  document.body.style.overflow = 'hidden';
+});
+
+netlifyIdentity.init({ container: '#authScreen' });
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 // Theme
@@ -1761,8 +2120,7 @@ updateProUI();
 renderTasks();
 updateStats();
 
-// Onboarding — show on first visit
-if(!localStorage.getItem('pa_ob')) showOB();
+// Onboarding shown after auth in onAuthSuccess()
 
 // ── Service Worker ────────────────────────────────────────────────────────────
 if('serviceWorker' in navigator){
