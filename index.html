@@ -1304,7 +1304,7 @@ select option { background:var(--black4); }
         <div class="plan-note save">Save 40% · $35.99/yr</div>
       </div>
     </div>
-    <button class="pw-cta" id="pwCta" onclick="startTrial()">Start 7-Day Free Trial</button>
+    <button class="pw-cta" id="pwCta" onclick="startTrial()">Start 7-Day Free Trial →</button>
     <button class="pw-restore" onclick="restorePurchases()">Restore purchases</button>
     <div class="pw-legal">No charge for 7 days. Cancel anytime.<br>Subscription auto-renews unless cancelled.</div>
   </div>
@@ -1865,31 +1865,28 @@ function selPlan(p) {
   $('pwCta').textContent=pro.status==='free'?'Start 7-Day Free Trial':(p==='yearly'?'Subscribe · $35.99/yr':'Subscribe · $4.99/mo');
 }
 
+const RC_CHECKOUT_URL = 'https://pay.rev.cat/qknbblmyhwghzvfx/';
+
 async function startTrial() {
-  const btn=$('pwCta');
-  btn.disabled=true;
-  btn.innerHTML='<span class="spin"></span> Starting...';
+  closePW();
+  toast('Opening secure checkout... ✦');
+  const uid = currentUser ? currentUser.email : (pro.uid || genUID());
+  setTimeout(() => {
+    window.location.href = RC_CHECKOUT_URL + '?app_user_id=' + encodeURIComponent(uid);
+  }, 600);
+}
 
-  try {
-    // RevenueCat SDK — uncomment when going live:
-    // const {Purchases}=await import('https://cdn.jsdelivr.net/npm/@revenuecat/purchases-js@0.13.0/dist/index.js');
-    // const uid=pro.uid||genUID();
-    // const purchases=Purchases.configure(RC_KEY,uid);
-    // const offerings=await purchases.getOfferings();
-    // const pkg=offerings.current.availablePackages.find(p=>p.identifier===(selPlanId==='yearly'?'$rc_annual':'$rc_monthly'));
-    // const {customerInfo}=await purchases.purchasePackage(pkg);
-    // if(customerInfo.entitlements.active['pro']){pro.status='pro';}
-    // else{pro.status='trial';pro.trialStart=Date.now();}
-    await new Promise(r=>setTimeout(r,900));
-    pro.status='trial'; pro.trialStart=Date.now();
-    pro.plan=selPlanId; pro.uid=pro.uid||genUID();
-    savePro(); closePW(); updateProUI();
-    toast('7-day trial started! Welcome to Pro ✦');
-    if(pwTrigger==='patterns') nav('patterns',$('navSettings').previousElementSibling);
-  } catch(e) { toast('Purchase failed — try again'); }
-
-  btn.disabled=false;
-  btn.textContent='Start 7-Day Free Trial';
+function checkRCReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = document.referrer || '';
+  if (params.get('rc_success') === '1' || ref.includes('pay.rev.cat') || ref.includes('rev.cat')) {
+    pro.status = 'pro';
+    pro.plan = selPlanId || 'yearly';
+    savePro();
+    updateProUI();
+    toast('Welcome to PriorAI Pro! ✦');
+    window.history.replaceState({}, '', window.location.pathname);
+  }
 }
 
 async function restorePurchases() {
@@ -2182,6 +2179,9 @@ $('fDeadline').value=today();
 
 // Pro UI
 updateProUI();
+
+// Check if returning from RevenueCat checkout
+checkRCReturn();
 
 // Render
 renderTasks();
